@@ -1,13 +1,52 @@
 from django.shortcuts import render
 from .forms import TaskModelForm
 from .models import Task, TaskDetail, Employee, Project
+from django.db.models import Count,Q
 
 # Create your views here.
 
 
 def manager_dashboard(request):
+  
+   
+    
+    
+    counts = Task.objects.aggregate(
+        total =Count('id'),
+        completed =Count('id', filter=Q(status='COMPLETED')),
+        in_progress =Count('id', filter=Q(status='IN_PROGRESS')),
+        pending =Count('id', filter=Q(status='PENDING')),               
+                         )
+    base_query = Task.objects.select_related('details').prefetch_related('assigned_to')
 
-    return render(request, 'tasks/manager_dashboard.html', {})
+
+    type = request.GET.get('type', 'all')     
+
+    if type == 'completed':
+        tasks = base_query.filter(status='COMPLETED')   
+
+    elif type == "in_progress":
+        tasks = base_query.filter(status ="IN_PROGRESS")   
+
+    elif type == "pending":
+        tasks = base_query.filter(status ="PENDING")   
+
+    elif type == 'all':
+        tasks = base_query.all()
+
+    
+
+
+
+    context = {
+        "tasks" : tasks,
+        "counts": counts
+        
+    }
+
+
+
+    return render(request, 'tasks/manager_dashboard.html', context)
 
 def user_dashboard(request):
     return render(request, 'tasks/user_dashboard.html', {})
