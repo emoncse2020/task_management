@@ -10,12 +10,19 @@
 <body>
     <h1>Welcome to Authentication System</h1>
     <div>
+
+        <div>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="px-2 py-1 {% if message.tags == 'success' %} bg-green-500 {% endif %} ">{{message}}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
        
         <form action="" method="POST">
             {% csrf_token %}
 
-            <input type="text" name="username" placeholder="Enter your username" id="">
-            <input type="password" name="password" placeholder="Enter your password" id="">
+            {{form}}
            
             <button type="submit">Sign In</button>
         </form>
