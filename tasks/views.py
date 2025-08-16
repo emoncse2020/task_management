@@ -3,15 +3,16 @@ from .forms import TaskModelForm, TaskDetailModelForm
 from .models import Task, TaskDetail, Employee, Project
 from django.db.models import Count,Q
 from django.contrib import messages
-
+from django.contrib.auth.decorators import user_passes_test, permission_required, login_required
 # Create your views here.
 
+def is_manager(user):
+    return user.groups.filter(name="Manager").exists()
+def is_employee(user):
+    return user.groups.filter(name="Employee").exists()
 
+@user_passes_test(is_manager, login_url='no-permission')
 def manager_dashboard(request):
-  
-   
-    
-    
     counts = Task.objects.aggregate(
         total =Count('id'),
         completed =Count('id', filter=Q(status='COMPLETED')),
@@ -45,14 +46,15 @@ def manager_dashboard(request):
         
     }
 
-
-
     return render(request, 'tasks/manager_dashboard.html', context)
 
-def user_dashboard(request):
-    return render(request, 'tasks/user_dashboard.html', {})
 
+@user_passes_test(is_employee, login_url='no-permission')
+def employee_dashboard(request):
+    return render(request, 'tasks/employee_dashboard.html', {})
 
+@login_required
+@permission_required('tasks.add_task', login_url='no-permission')
 def create_task(request):
     # employees = Employee.objects.all()
     task_form = TaskModelForm()  # For GET
@@ -78,6 +80,8 @@ def create_task(request):
     return render(request, "tasks/task_form.html", context)
 # update tasks
 
+@login_required
+@permission_required('tasks.change_task', login_url='no-permission')
 def update_task(request, id):
     task = Task.objects.get(id=id)
     # employees = Employee.objects.all()
@@ -106,7 +110,8 @@ def update_task(request, id):
 
 
 # delete task
-
+@login_required
+@permission_required('tasks.delete_task', login_url='no-permission')
 def delete_task(request, id):
     if request.method=="POST":
         task = Task.objects.get(id=id)
@@ -117,7 +122,8 @@ def delete_task(request, id):
         messages.error(request, "Something went wrong")
         return redirect('manager-dashboard')
     
-
+@login_required
+@permission_required('tasks.view_task', login_url='no-permission')
 def view_task(request):
     tasks = Task.objects.all()
 
