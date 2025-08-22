@@ -1,16 +1,6 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
-</head>
-<body>
-    <h1>Welcome to Authentication System</h1>
-    <div>
-
+{% extends "core/_base.html" %}
+{% block content %}
+    <div class='min-w-3xl mx-auto min-h-[500px] flex justify-center items-center my-5'>
         <div>
             {% if messages %}
                 {% for message in messages %}
@@ -24,8 +14,7 @@
 
             {{form}}
            
-            <button type="submit">Sign In</button>
+            <button type="submit" class="bg-green-500 w-full text-center mt-3 rounded py-2 px-3">Sign In</button>
         </form>
     </div>
-</body>
-</html>
+{% endblock content %}

@@ -18,7 +18,7 @@
        <div class="grid grid-cols-4 gap-4 p-4 items-center">
         <div class="flex items-center gap-2">
           <div class="w-2 h-2 rounded-full bg-green-500"></div>
-          <span>{{task.title}}</span>
+          <a href="{% url 'task-details' task.id %}">{{task.title}}</a>
          <a href="{% url "update-task" task.id %}"><button class="bg-green-500 px-2 py-1"> Edit</button></a>
         <form action="{% url 'delete-task' task.id %}" method="POST">
           {% csrf_token %}
@@ -38,7 +38,7 @@
          <div
             class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm border-2 border-white"
           >
-           {{emp.name|slice:':2'}}
+           {{emp.first_name|slice:':2'}}
           </div>
 
         {% endfor %}
