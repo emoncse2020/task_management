@@ -29,6 +29,7 @@ DEBUG = config('DEBUG')
 ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'http://127.0.0.1:8000/']
 
+AUTH_USER_MODEL = 'users.CustomUser'
 
 # Application definition
 
