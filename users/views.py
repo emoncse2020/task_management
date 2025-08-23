@@ -1,13 +1,17 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .forms import CustomRegistrationForm, CreateGroupForm
+from .forms import CustomRegistrationForm, CreateGroupForm, CustomPasswordChangeForm
 from django.contrib.auth import login,  logout
 from .forms import LoginForm, AssignRoleForm
 from django.contrib.auth.tokens import default_token_generator
 # Create your views here.
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.views.generic import TemplateView
+
+
 
 # test for users
 def is_admin(user):
@@ -35,21 +39,35 @@ def sign_up(request):
     }
     return render(request, 'users/registration/register.html',context)
 
-def sign_in(request):
+# def sign_in(request):
 
-    form = LoginForm()
+#     form = LoginForm()
 
-    if request.method == "POST":
-        form = LoginForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('home')
+#     if request.method == "POST":
+#         form = LoginForm(data=request.POST)
+#         if form.is_valid():
+#             user = form.get_user()
+#             login(request, user)
+#             return redirect('home')
 
-    context = {
-        "form": form
-    }
-    return render (request, 'users/registration/signIn.html',context )
+#     context = {
+#         "form": form
+#     }
+#     return render (request, 'users/registration/login.html',context )
+
+class SignIn(LoginView):
+    template_name = 'users/registration/login.html'
+    form_class = LoginForm
+    next_page = 'dashboard'
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        return next_url if next_url else super().get_success_url()
+    
+class CustomChangePassword(PasswordChangeView):
+    template_name = 'users/accounts/password_change.html'
+    form_class = CustomPasswordChangeForm
+
 
 @login_required
 def sign_out(request):
@@ -130,3 +148,19 @@ def group_list(request):
         "groups": groups
     }
     return render (request, 'users/admin/group_list.html', context)
+
+
+class ProfileView(TemplateView):
+    template_name = 'users/accounts/profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['username'] = user.username
+        context['email'] = user.email
+        context['name'] = user.get_full_name()
+        context['member_since'] = user.date_joined
+        context['last_login'] = user.last_login
+ 
+        return context
+
