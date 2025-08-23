@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
-from .forms import CustomRegistrationForm, CreateGroupForm, CustomPasswordChangeForm
+from .forms import CustomRegistrationForm, CreateGroupForm, CustomPasswordChangeForm,CustomPasswordResetForm,CustomPasswordResetConfirmForm
 from django.contrib.auth import login,  logout
 from .forms import LoginForm, AssignRoleForm
 from django.contrib.auth.tokens import default_token_generator
 # Create your views here.
 from django.db.models import Prefetch
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView,PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.views.generic import TemplateView
+from django.urls import reverse_lazy
 
 
 
@@ -164,3 +165,29 @@ class ProfileView(TemplateView):
  
         return context
 
+class CustomPasswordResetView(PasswordResetView):
+    form_class = CustomPasswordResetForm
+    template_name = 'users/registration/reset_password.html'
+    success_url = reverse_lazy('sign-in')
+    html_email_template_name = 'users/registration/reset_email.html'
+
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+        context['protocol'] = 'https' if self.request.is_secure() else 'http'
+        context['domain'] =  self.request.get_host()
+        return context
+ 
+    def form_valid(self, form):
+        messages.success(self.request, 'A reset email sent. Please Check your email' )
+       
+        return super().form_valid(form)
+    
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = CustomPasswordResetConfirmForm
+    template_name = 'users/registration/reset_password.html'
+    success_url = reverse_lazy('sign-in')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Password reset successfully' )
+       
+        return super().form_valid(form)
